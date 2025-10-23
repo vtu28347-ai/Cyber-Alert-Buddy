@@ -1,123 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Alert Buddy - Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber Alert Buddy Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header class="header">
-        <div class="logo">
-            <i class="fas fa-shield-alt"></i> Cyber Alert Buddy
-        </div>
-    </header>
+  <!-- HEADER SECTION -->
+  <header>
+    <h1>🛡️ Cyber Alert Buddy Dashboard</h1>
+    <p>AI-Powered Fraud Detection and Cyber Safety Awareness</p>
+  </header>
 
-    <main class="dashboard-main">
-        <section class="hero-banner">
-            <h1>Your Trusted Cyber Security Companion</h1>
-            <p>Stay protected from online scams and cyber threats with real-time alerts and expert guidance</p>
-        </section>
-<section class="fraud-detection-section">
-    <div id="accuracy-display"></div> 
-
-    <h2 class="section-title"><i class="fas fa-chart-line"></i> Real-time Fraud Detection Dashboard</h2>
-
-    <div class="filters">
-        <label for="scam-type-filter">Filter Alerts by Type:</label>
+  <!-- MAIN DASHBOARD SECTION -->
+  <main>
+    <section class="dashboard">
+      <div class="filter-bar">
+        <label for="scam-type-filter">Filter by Scam Type:</label>
         <select id="scam-type-filter" onchange="filterAlerts()">
-            <option value="all">All Incidents (Running Detection)</option>
-            <option value="Phishing">Phishing</option>
-            <option value="Investment Fraud">Investment Fraud</option>
-            <option value="Tech Support Scam">Tech Support Scam</option>
-            <option value="Genuine Report">Safe/Genuine</option>
+          <option value="all">All</option>
+          <option value="Phishing">Phishing</option>
+          <option value="Fake Loan">Fake Loan</option>
+          <option value="Investment Fraud">Investment Fraud</option>
+          <option value="Lottery Scam">Lottery Scam</option>
+          <option value="Crypto Scam">Crypto Scam</option>
         </select>
+      </div>
+
+      <!-- Alerts Display -->
+      <div id="alerts-container" class="alerts-grid">
+        <!-- Dynamically filled by script.js -->
+      </div>
+
+      <!-- System Accuracy Display -->
+      <div id="accuracy-display" class="accuracy-box"></div>
+    </section>
+
+    <!-- ACTIONS / QUIZ -->
+    <section class="actions-section">
+      <h2>Quick Actions</h2>
+      <div class="actions-grid">
+        <a href="#" class="action-item">
+          <span>📘 Learn Safety Tips</span>
+        </a>
+        <a href="#" class="action-item" id="start-quiz-btn">
+          <span>🧠 Take Cyber Safety Quiz</span>
+        </a>
+        <a href="#" class="action-item">
+          <span>⚠️ Report a Scam</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- CYBER SECURITY QUIZ MODAL -->
+  <div id="quiz-modal">
+    <div class="quiz-modal-content">
+      <span id="close-quiz-btn">&times;</span>
+
+      <div id="quiz-section">
+        <div id="progress-text"></div>
+        <div class="progress-container"><div id="progress-bar"></div></div>
+        <div id="question-area"></div>
+        <div id="options-area"></div>
+        <button id="next-btn" disabled>Next Question</button>
+      </div>
+
+      <div id="result-section" style="display:none;">
+        <div id="score-display"></div>
+        <div id="rating-display"></div>
+        <button id="retake-btn">Retake Quiz</button>
+      </div>
     </div>
+  </div>
 
-    <div id="alerts-container" class="alerts-grid">
-        <p style="text-align:center;">Loading and running fraud detection engine...</p>
-    </div>
-</section>
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Cyber Alert Buddy | Built for Awareness & Protection</p>
+  </footer>
 
-                <div class="card community-impact">
-                    <h2 class="card-title"><i class="fas fa-users"></i> Community Impact</h2>
-                    <div class="impact-stats">
-                        <div class="stat-item">
-                            <span class="stat-number green-text">2,543</span>
-                            <span class="stat-label">Users Protected</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">187</span>
-                            <span class="stat-label">Scams Reported</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number green-text">88%</span>
-                            <span class="stat-label">Safety Score</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <section class="quick-actions">
-            <h2>Quick Actions</h2>
-            <div class="actions-grid">
-                <a href="https://cybercrime.gov.in/Webform/Crime_AuthoLogin.aspx" class="action-item red-bg" target="_blank">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Report</span>
-                    <small>Scam</small>
-                </a>
-                <a href="learning.html" class="action-item green-bg">
-                    <i class="fas fa-book-open"></i>
-                    <span>Learn</span>
-                    <small>Safety</small>
-                </a>
-                <a href="#" class="action-item yellow-bg">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span>Alerts</span>
-                    <small>Check</small>
-                </a>
-                <a href="https://docs.google.com/forms/d/1oX03THxKUL4lLHNr4jYEzLLl_JhHExKb9Pa3fCesIcc/edit" class="action-item" style="background-color:#34495e; color:white;" target="_blank">
-                    <i class="fas fa-share-alt"></i> 
-                    <span>Share</span>
-                    <small>with Us</small>
-                </a>
-                <a href="#quiz-container" id="start-quiz-btn" class="action-item purple-bg">
-    <i class="fas fa-question-circle"></i>
-    <span>Quiz</span>
-    <small>Test</small>
-</a>
-            </div>
-        </section>
-        <div id="quiz-modal" class="modal">
-    <div class="modal-content">
-        <span id="close-quiz-btn" class="close-btn">&times;</span>
-        <h2>Cyber Security Quiz</h2>
-        <div id="quiz-section">
-            <div id="question-area"></div>
-
-            <div id="options-area" class="options-grid"></div>
-
-            <div class="quiz-controls">
-                <button id="next-btn" class="control-btn">Next Question</button>
-            </div>
-            
-            <div id="progress-bar-container">
-                <div id="progress-bar"></div>
-                <span id="progress-text">1 of 12</span>
-            </div>
-        </div>
-
-        <div id="result-section" style="display: none;">
-            <h3>Quiz Complete!</h3>
-            <div id="score-display"></div>
-            <div id="rating-display" class="rating-box"></div>
-            <button id="retake-btn" class="control-btn">Retake Quiz</button>
-        </div>
-    </div>
-</div>
-    </main>
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

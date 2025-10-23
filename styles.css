@@ -726,3 +726,25 @@ body {
 .rating-good { background-color: #2980b9; } /* Dark Blue */
 .rating-fair { background-color: #f39c12; } /* Orange */
 .rating-poor { background-color: #c0392b; } /* Dark Red */
+/* --- Responsive Fix for Quiz Modal --- */
+@media (max-width: 600px) {
+    .modal-content {
+        /* Use more of the screen width on phones */
+        width: 95%; 
+        
+        /* Reduce the padding to save space */
+        padding: 20px 15px; 
+        
+        /* Adjust margin to give a little space from the top */
+        margin: 10% auto; 
+    }
+
+    #question-area {
+        font-size: 1.1em; /* Make question text slightly smaller */
+    }
+
+    .option-btn {
+        padding: 12px; /* Make option buttons a bit smaller */
+        font-size: 0.95em;
+    }
+}

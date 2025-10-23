@@ -1,22 +1,22 @@
 // Global variable to hold all data after fetching
-window.allAlerts = []; 
+window.allAlerts = []; 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Start the core function to fetch data and run detection
-    fetchAndAnalyzeAlerts();
-    
-    // 2. Keep existing quick actions handlers for the footer section
-    const quickActions = document.querySelectorAll('.actions-grid .action-item');
-    quickActions.forEach(action => {
-        action.addEventListener('click', (e) => {
-            const link = action.getAttribute('href');
-            if (link === '#') {
-                e.preventDefault(); 
-                const actionName = action.querySelector('span').textContent;
-                console.log(`${actionName} action triggered.`);
-            }
-        });
-    });
+    // 1. Start the core function to fetch data and run detection
+    fetchAndAnalyzeAlerts();
+    
+    // 2. Keep existing quick actions handlers for the footer section
+    const quickActions = document.querySelectorAll('.actions-grid .action-item');
+    quickActions.forEach(action => {
+        action.addEventListener('click', (e) => {
+            const link = action.getAttribute('href');
+            if (link === '#') {
+                e.preventDefault(); 
+                const actionName = action.querySelector('span').textContent;
+                console.log(`${actionName} action triggered.`);
+            }
+        });
+    });
 });
 
 // --------------------------------------------------------------
@@ -24,217 +24,217 @@ document.addEventListener('DOMContentLoaded', () => {
 // --------------------------------------------------------------
 
 async function fetchAndAnalyzeAlerts() {
-    const alertsContainer = document.getElementById('alerts-container');
-    alertsContainer.innerHTML = '<p style="text-align:center;">Analyzing data with detection engine...</p>';
+    const alertsContainer = document.getElementById('alerts-container');
+    alertsContainer.innerHTML = '<p style="text-align:center;">Analyzing data with detection engine...</p>';
 
-    try {
-        // This connects to the function you created in the netlify/functions folder
-        const response = await fetch('/.netlify/functions/analyze-fraud'); 
-        
-        if (!response.ok) {
-            throw new Error(`Detection Engine Error! Status: ${response.status}`);
-        }
-        
-        const analyzedData = await response.json(); 
-        
-        window.allAlerts = analyzedData; // Save all data
-        
-        renderAlerts(analyzedData);
-        
-        // Show the overall system accuracy (using the static value from the function)
-        if (analyzedData.length > 0) {
-            displayAccuracyMeter(analyzedData[0].system_accuracy);
-        }
+    try {
+        // This connects to the function you created in the netlify/functions folder
+        const response = await fetch('/.netlify/functions/analyze-fraud'); 
+        
+        if (!response.ok) {
+            throw new Error(`Detection Engine Error! Status: ${response.status}`);
+        }
+        
+        const analyzedData = await response.json(); 
+        
+        window.allAlerts = analyzedData; // Save all data
+        
+        renderAlerts(analyData);
+        
+        // Show the overall system accuracy (using the static value from the function)
+        if (analyzedData.length > 0) {
+            displayAccuracyMeter(analyzedData[0].system_accuracy);
+        }
 
-    } catch (error) {
-        console.error("Error fetching/analyzing alerts:", error);
-        alertsContainer.innerHTML = '<p style="text-align:center; color: red;">Error: Could not connect to Detection Engine. Check Netlify deployment.</p>';
-    }
+    } catch (error) {
+        console.error("Error fetching/analyzing alerts:", error);
+        alertsContainer.innerHTML = '<p style="text-align:center; color: red;">Error: Could not connect to Detection Engine. Check Netlify deployment.</p>';
+    }
 }
 
 function renderAlerts(alerts) {
-    const alertsContainer = document.getElementById('alerts-container');
-    alertsContainer.innerHTML = ''; 
+    const alertsContainer = document.getElementById('alerts-container');
+    alertsContainer.innerHTML = ''; 
 
-    if (alerts.length === 0) {
-        alertsContainer.innerHTML = '<p style="text-align:center;">No current alerts found matching the filter.</p>';
-        return;
-    }
-    
-    alerts.forEach(alert => {
-        // Determine display properties based on detection result
-        const statusText = alert.is_fraud ? "FRAUD DETECTED" : "SAFE / UNCERTAIN";
-        const statusClass = alert.is_fraud ? "critical" : "low";
+    if (alerts.length === 0) {
+        alertsContainer.innerHTML = '<p style="text-align:center;">No current alerts found matching the filter.</p>';
+        return;
+    }
+    
+    alerts.forEach(alert => {
+        // Determine display properties based on detection result
+        const statusText = alert.is_fraud ? "FRAUD DETECTED" : "SAFE / UNCERTAIN";
+        const statusClass = alert.is_fraud ? "critical" : "low";
 
-        const card = document.createElement('div');
-        // Use a unique class for styling
-        card.className = `alert-card-item ${alert.type.toLowerCase().replace(/\s/g, '-')}`;
+        const card = document.createElement('div');
+        // Use a unique class for styling
+        card.className = `alert-card-item ${alert.type.toLowerCase().replace(/\s/g, '-')}`;
 
-        card.innerHTML = `
-            <div class="card-header-dynamic">
-                <span class="scam-type-tag">${alert.type}</span>
-                <span class="timestamp">${alert.location || 'N/A'}</span>
-            </div>
-            <div class="card-body-dynamic">
-                <h3>Incident: ${alert.type}</h3>
-                <p><strong>Keywords:</strong> ${alert.keywords}</p>
-                <p>URL: ${alert.url || 'N/A'}</p>
-            </div>
-            <div class="card-footer-dynamic">
-                <span class="status ${statusClass}">${statusText}</span>
-                <span class="confidence-score">Confidence: ${alert.confidence_score.toFixed(1)}%</span>
-            </div>
-        `;
-        alertsContainer.appendChild(card);
-    });
+        card.innerHTML = `
+            <div class="card-header-dynamic">
+                <span class="scam-type-tag">${alert.type}</span>
+                <span class="timestamp">${alert.location || 'N/A'}</span>
+            </div>
+            <div class="card-body-dynamic">
+                <h3>Incident: ${alert.type}</h3>
+                <p><strong>Keywords:</strong> ${alert.keywords}</p>
+E               <p>URL: ${alert.url || 'N/A'}</p>
+            </div>
+            <div class="card-footer-dynamic">
+                <span class="status ${statusClass}">${statusText}</span>
+                <span class="confidence-score">Confidence: ${alert.confidence_score.toFixed(1)}%</span>
+            </div>
+        `;
+        alertsContainer.appendChild(card);
+    });
 }
 
 // Function triggered by the HTML <select onchange="filterAlerts()">
 function filterAlerts() {
-    const filterValue = document.getElementById('scam-type-filter').value;
-    
-    if (filterValue === 'all') {
-        renderAlerts(window.allAlerts);
-    } else {
-        const filtered = window.allAlerts.filter(alert => alert.type === filterValue);
-        renderAlerts(filtered);
-    }
+    const filterValue = document.getElementById('scam-type-filter').value;
+    
+    if (filterValue === 'all') {
+        renderAlerts(window.allAlerts);
+    } else {
+        const filtered = window.allAlerts.filter(alert => alert.type === filterValue);
+        renderAlerts(filtered);
+    }
 }
 
 // Function to display the required overall accuracy number
 function displayAccuracyMeter(accuracy) {
-    const meterHTML = `
-        <div class="accuracy-meter-box">
-            <h3 class="meter-title">System Performance</h3>
-            <p class="meter-score">Overall Accuracy: <strong>${accuracy.toFixed(1)}%</strong></p>
-            <p class="meter-note">(Based on Rule-Engine evaluation against synthetic data)</p>
-        </div>
-    `;
-    document.getElementById('accuracy-display').innerHTML = meterHTML;
+    const meterHTML = `
+        <div class="accuracy-meter-box">
+            <h3 class="meter-title">System Performance</h3>
+            <p class="meter-score">Overall Accuracy: <strong>${accuracy.toFixed(1)}%</strong></p>
+            <p class="meter-note">(Based on Rule-Engine evaluation against synthetic data)</p>
+        </div>
+    `;
+    document.getElementById('accuracy-display').innerHTML = meterHTML;
 }
 // --- Quiz Data (12 Questions) ---
 const quizData = [
-    // The 12-question structure you provided earlier, adapted for JavaScript
-    {
-      question: "What is the primary goal of a phishing attack?",
-      options: [
-        "To crash your computer's operating system.",
-        "To manipulate a user into revealing sensitive information.",
-        "To monitor your network traffic without authorization.",
-        "To permanently delete all files on your hard drive."
-      ],
-      answer: 1 // Index of the correct answer (0-based)
-    },
-    {
-      question: "Which characteristic is most important for creating a strong and secure password?",
-      options: [
-        "Using a combination of your name and birthday.",
-        "Ensuring it is at least 15 characters long and includes a random mix of characters.",
-        "Changing it frequently, such as every two weeks.",
-        "Using the same password across all your accounts for ease of recall."
-      ],
-      answer: 1
-    },
-    {
-      question: "What type of malicious software encrypts a user's files and demands payment to restore access?",
-      options: [
-        "Spyware",
-        "Adware",
-        "Ransomware",
-        "Trojan Horse"
-      ],
-      answer: 2
-    },
-    {
-      question: "What security measure requires a user to provide two or more different verification factors to gain access to a resource?",
-      options: [
-        "Single Sign-On (SSO)",
-        "Biometric Authentication",
-        "Multi-Factor Authentication (MFA)",
-        "CAPTCHA"
-      ],
-      answer: 2
-    },
-    {
-      question: "What does the 's' in https:// stand for in a web address, and why is it important?",
-      options: [
-        "Search, meaning the site is optimized for search engines.",
-        "Secure, meaning the connection is encrypted with SSL/TLS.",
-        "Server, meaning the site is hosted on a high-end web server.",
-        "Source, meaning the original source code is available."
-      ],
-      answer: 1
-    },
-    {
-      question: "An attacker calls an employee pretending to be an IT technician to gain their password. This is an example of what kind of threat?",
-      options: [
-        "Denial of Service (DoS)",
-        "Social Engineering",
-        "SQL Injection",
-        "Zero-Day Exploit"
-      ],
-      answer: 1
-    },
-    {
-      question: "What is the primary reason for regularly updating your operating system and applications?",
-      options: [
-        "To improve aesthetic appeal with new themes and icons.",
-        "To install patches for newly discovered security vulnerabilities.",
-        "To reduce the amount of memory (RAM) used by the system.",
-        "To increase compatibility with older, outdated hardware."
-      ],
-      answer: 1
-    },
-    {
-      question: "When connecting to public Wi-Fi, what tool should you always use to protect your data, especially when banking or shopping?",
-      options: [
-        "A standard anti-virus program.",
-        "An extra-long password.",
-        "A Virtual Private Network (VPN).",
-        "A physical firewall device."
-      ],
-      answer: 2
-    },
-    {
-      question: "Why is maintaining offline or cloud backups of your important files a vital part of cyber security?",
-      options: [
-        "It helps prevent all types of malware from infecting your computer.",
-        "It allows you to restore your data after an incident like ransomware or hardware failure.",
-        "It automatically detects phishing emails before you open them.",
-        "It is required for all modern operating systems to function."
-      ],
-      answer: 1
-    },
-    {
-      question: "Before clicking a link in an email, which part of the URL should you most closely examine to verify the link's legitimacy?",
-      options: [
-        "The protocol prefix (http:// or https://).",
-        "The file name or path after the domain (/login.php).",
-        "The domain name (e.g., google.com in mail.google.com).",
-        "The first two characters of the link."
-      ],
-      answer: 2
-    },
-    {
-      question: "If you receive an unexpected email from your bank asking you to click a link to verify your account immediately, what is the best immediate action?",
-      options: [
-        "Click the link and quickly enter your login information before the site expires.",
-        "Reply to the email asking for confirmation of the request.",
-        "Open a new browser window and navigate to the bank's official website directly.",
-        "Forward the email to a friend to see if they received the same message."
-      ],
-      answer: 2
-    },
-    {
-      question: "When setting up a new Internet of Things (IoT) device (e.g., a smart camera), what is the most important initial security step?",
-      options: [
-        "Changing the factory default username and password.",
-        "Connecting it to a guest Wi-Fi network.",
-        "Downloading a mobile anti-virus application.",
-        "Enabling the Bluetooth function."
-      ],
-      answer: 0
-    }
+    // The 12-question structure you provided earlier, adapted for JavaScript
+    {
+      question: "What is the primary goal of a phishing attack?",
+      options: [
+        "To crash your computer's operating system.",
+        "To manipulate a user into revealing sensitive information.",
+        "To monitor your network traffic without authorization.",
+        "To permanently delete all files on your hard drive."
+      ],
+      answer: 1 // Index of the correct answer (0-based)
+    },
+    {
+      question: "Which characteristic is most important for creating a strong and secure password?",
+      options: [
+        "Using a combination of your name and birthday.",
+        "Ensuring it is at least 15 characters long and includes a random mix of characters.",
+        "Changing it frequently, such as every two weeks.",
+        "Using the same password across all your accounts for ease of recall."
+      ],
+      answer: 1
+    },
+    {
+      question: "What type of malicious software encrypts a user's files and demands payment to restore access?",
+      options: [
+        "Spyware",
+        "Adware",
+        "Ransomware",
+        "Trojan Horse"
+      ],
+      answer: 2
+    },
+    {
+      question: "What security measure requires a user to provide two or more different verification factors to gain access to a resource?",
+      options: [
+        "Single Sign-On (SSO)",
+        "Biometric Authentication",
+      S   "Multi-Factor Authentication (MFA)",
+        "CAPTCHA"
+      ],
+      answer: 2
+    },
+    {
+      question: "What does the 's' in https:// stand for in a web address, and why is it important?",
+      options: [
+        "Search, meaning the site is optimized for search engines.",
+        "Secure, meaning the connection is encrypted with SSL/TLS.",
+        "Server, meaning the site is hosted on a high-end web server.",
+        "Source, meaning the original source code is available."
+      ],
+      answer: 1
+    },
+    {
+      question: "An attacker calls an employee pretending to be an IT technician to gain their password. This is an example of what kind of threat?",
+A       options: [
+          "Denial of Service (DoS)",
+          "Social Engineering",
+          "SQL Injection",
+          "Zero-Day Exploit"
+        ],
+      answer: 1
+    },
+    {
+      question: "What is the primary reason for regularly updating your operating system and applications?",
+      options: [
+        "To improve aesthetic appeal with new themes and icons.",
+        "To install patches for newly discovered security vulnerabilities.",
+        "To reduce the amount of memory (RAM) used by the system.",
+        "To increase compatibility with older, outdated hardware."
+      ],
+      answer: 1
+    },
+    {
+      question: "When connecting to public Wi-Fi, what tool should you always use to protect your data, especially when banking or shopping?",
+V       options: [
+          "A standard anti-virus program.",
+          "An extra-long password.",
+          "A Virtual Private Network (VPN).",
+          "A physical firewall device."
+        ],
+      answer: 2
+    },
+    {
+      question: "Why is maintaining offline or cloud backups of your important files a vital part of cyber security?",
+A       options: [
+          "It helps prevent all types of malware from infecting your computer.",
+          "It allows you to restore your data after an incident like ransomware or hardware failure.",
+          "It automatically detects phishing emails before you open them.",
+          "It is required for all modern operating systems to function."
+        ],
+      answer: 1
+    },
+E   {
+      question: "Before clicking a link in an email, which part of the URL should you most closely examine to verify the link's legitimacy?",
+      options: [
+        "The protocol prefix (http:// or https://).",
+        "The file name or path after the domain (/login.php).",
+S         "The domain name (e.g., google.com in mail.google.com).",
+        "The first two characters of the link."
+      ],
+      answer: 2
+    },
+    {
+      question: "If you receive an unexpected email from your bank asking you to click a link to verify your account immediately, what is the best immediate action?",
+s       options: [
+          "Click the link and quickly enter your login information before the site expires.",
+          "Reply to the email asking for confirmation of the request.",
+s         "Open a new browser window and navigate to the bank's official website directly.",
+          "Forward the email to a friend to see if they received the same message."
+        ],
+      answer: 2
+    },
+s   {
+      question: "When setting up a new Internet of Things (IoT) device (e.g., a smart camera), what is the most important initial security step?",
+      options: [
+        "Changing the factory default username and password.",
+        "Connecting it to a guest Wi-Fi network.",
+        "Downloading a mobile anti-virus application.",
+        "Enabling the Bluetooth function."
+      ],
+      answer: 0
+    }
 ];
 
 // --- Quiz Variables ---
@@ -260,19 +260,19 @@ const progressText = document.getElementById('progress-text');
 
 // --- Event Listeners to Control the Modal ---
 startQuizBtn.addEventListener('click', (e) => {
-    e.preventDefault(); // Stop the default anchor link behavior
-    quizModal.style.display = 'block';
-    startQuiz();
+    e.preventDefault(); // Stop the default anchor link behavior
+    quizModal.style.display = 'block';
+    startQuiz();
 });
 
 closeQuizBtn.addEventListener('click', () => {
-    quizModal.style.display = 'none';
+    quizModal.style.display = 'none';
 });
 
 window.addEventListener('click', (event) => {
-    if (event.target === quizModal) {
-        quizModal.style.display = 'none';
-    }
+    if (event.target === quizModal) {
+        quizModal.style.display = 'none';
+    }
 });
 
 nextBtn.addEventListener('click', handleNextButton);
@@ -282,141 +282,145 @@ retakeBtn.addEventListener('click', startQuiz);
 // --- Quiz Logic Functions ---
 
 function startQuiz() {
-    currentQuestionIndex = 0;
-    score = 0;
-    
-    // Reset views
-    quizSection.style.display = 'block';
-    resultSection.style.display = 'none';
-    nextBtn.disabled = true;
-    nextBtn.textContent = 'Next Question';
-    
-    showQuestion();
+    currentQuestionIndex = 0;
+    score = 0;
+    
+    // Reset views
+    quizSection.style.display = 'block';
+    resultSection.style.display = 'none';
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Next Question';
+    
+    showQuestion();
 }
 
 function showQuestion() {
-    const q = quizData[currentQuestionIndex];
-    selectedOptionIndex = -1; // Reset selection
+    const q = quizData[currentQuestionIndex];
+    selectedOptionIndex = -1; // Reset selection
 
-    // 1. Update Question Text
-    questionArea.innerHTML = ${currentQuestionIndex + 1}. ${q.question};
+    // 1. Update Question Text
+    // --- FIX 1 ---
+    questionArea.innerHTML = \`${currentQuestionIndex + 1}. ${q.question}\`;
 
-    // 2. Update Options
-    optionsArea.innerHTML = ''; // Clear previous options
-    q.options.forEach((optionText, index) => {
-        const button = document.createElement('button');
-        button.classList.add('option-btn');
-        button.textContent = optionText;
-        button.dataset.index = index;
-        button.addEventListener('click', selectAnswer);
-        optionsArea.appendChild(button);
-    });
+    // 2. Update Options
+    optionsArea.innerHTML = ''; // Clear previous options
+    q.options.forEach((optionText, index) => {
+        const button = document.createElement('button');
+        button.classList.add('option-btn');
+        button.textContent = optionText;
+  Z       button.dataset.index = index;
+        button.addEventListener('click', selectAnswer);
+        optionsArea.appendChild(button);
+    });
 
-    // 3. Update Progress Bar
-    updateProgressBar();
+    // 3. Update Progress Bar
+    updateProgressBar();
 }
 
 function updateProgressBar() {
-    const total = quizData.length;
-    const progress = currentQuestionIndex;
-    const percentage = (progress / total) * 100;
-    
-    progressBar.style.width = percentage + '%';
-    progressText.textContent = ${progress + 1} of ${total};
-    
-    // Special case for last question
-    if (progress === total - 1) {
-        nextBtn.textContent = 'Finish Quiz';
-    } else {
-        nextBtn.textContent = 'Next Question';
-    }
+    const total = quizData.length;
+  A   const progress = currentQuestionIndex;
+    const percentage = (progress / total) * 100;
+    
+    progressBar.style.width = percentage + '%';
+    // --- FIX 2 ---
+    progressText.textContent = \`${progress + 1} of ${total}\`;
+    
+    // Special case for last question
+    if (progress === total - 1) {
+        nextBtn.textContent = 'Finish Quiz';
+    } else {
+        nextBtn.textContent = 'Next Question';
+    }
 }
 
 function selectAnswer(e) {
-    // Only allow selection if the next button hasn't been enabled yet (prevents double-checking)
-    if (nextBtn.disabled) {
-        // Clear existing selections
-        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+    // Only allow selection if the next button hasn't been enabled yet (prevents double-checking)
+    if (nextBtn.disabled) {
+        // Clear existing selections
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
 
-        // Mark current selection
-        const selectedBtn = e.target;
-        selectedBtn.classList.add('selected');
-        selectedOptionIndex = parseInt(selectedBtn.dataset.index);
-        
-        nextBtn.disabled = false; // Enable next button after selection
-    }
+        // Mark current selection
+        const selectedBtn = e.target;
+        selectedBtn.classList.add('selected');
+        selectedOptionIndex = parseInt(selectedBtn.dataset.index);
+        
+        nextBtn.disabled = false; // Enable next button after selection
+    }
 }
 
 function checkAnswer() {
-    // Disable all option buttons after answer is checked
-    document.querySelectorAll('.option-btn').forEach(btn => btn.removeEventListener('click', selectAnswer));
-    
-    const q = quizData[currentQuestionIndex];
-    const correctIndex = q.answer;
-    const allOptions = document.querySelectorAll('.option-btn');
+    // Disable all option buttons after answer is checked
+    document.querySelectorAll('.option-btn').forEach(btn => btn.removeEventListener('click', selectAnswer));
+    
+    const q = quizData[currentQuestionIndex];
+    const correctIndex = q.answer;
+    const allOptions = document.querySelectorAll('.option-btn');
 
-    // Highlight correct answer
-    allOptions[correctIndex].classList.add('correct');
+    // Highlight correct answer
+    allOptions[correctIndex].classList.add('correct');
 
-    if (selectedOptionIndex === correctIndex) {
-        score++;
-        // If the user selected correctly, their button is already marked 'selected', 
-        // and we've added 'correct', so 'correct' styling will take precedence.
-    } else if (selectedOptionIndex !== -1) {
-        // If user selected an incorrect answer, highlight it in red
-        allOptions[selectedOptionIndex].classList.remove('selected'); // Remove blue border
-        allOptions[selectedOptionIndex].classList.add('incorrect'); // Add red
-    }
+    if (selectedOptionIndex === correctIndex) {
+        score++;
+        // If the user selected correctly, their button is already marked 'selected', 
+        // and we've added 'correct', so 'correct' styling will take precedence.
+    } else if (selectedOptionIndex !== -1) {
+        // If user selected an incorrect answer, highlight it in red
+        allOptions[selectedOptionIndex].classList.remove('selected'); // Remove blue border
+        allOptions[selectedOptionIndex].classList.add('incorrect'); // Add red
+E   }
 }
 
 function handleNextButton() {
-    // 1. If we are on a question, check the answer first
-    if (currentQuestionIndex < quizData.length) {
-        checkAnswer();
-        
-        // Wait a moment so the user can see the correction before moving on
-        setTimeout(() => {
-            currentQuestionIndex++;
-            nextBtn.disabled = true; // Re-disable for the next question
-            
-            if (currentQuestionIndex < quizData.length) {
-                showQuestion();
-            } else {
-                showResults();
-            }
-        }, 800);
-        
-    }
+    // 1. If we are on a question, check the answer first
+    if (currentQuestionIndex < quizData.length) {
+        checkAnswer();
+        
+        // Wait a moment so the user can see the correction before moving on
+s       setTimeout(() => {
+            currentQuestionIndex++;
+            nextBtn.disabled = true; // Re-disable for the next question
+            
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }, 800);
+        
+    }
 }
 
 function showResults() {
-    quizSection.style.display = 'none';
-    resultSection.style.display = 'block';
+    quizSection.style.display = 'none';
+    resultSection.style.display = 'block';
 
-    const totalQuestions = quizData.length;
-    const finalScore = score;
-    const percentage = (finalScore / totalQuestions) * 100;
+    const totalQuestions = quizData.length;
+    const finalScore = score;
+s   const percentage = (finalScore / totalQuestions) * 100;
 
-    scoreDisplay.innerHTML = You answered **${finalScore} out of ${totalQuestions}** questions correctly! (${percentage.toFixed(0)}%);
+    // --- FIX 3 ---
+    scoreDisplay.innerHTML = \`You answered **${finalScore} out of ${totalQuestions}** questions correctly! (${percentage.toFixed(0)}%)\`;
 
-    // --- Evaluation Logic ---
-    let rating = '';
-    let ratingClass = '';
+    // --- Evaluation Logic ---
+    let rating = '';
+    let ratingClass = '';
 
-    if (finalScore >= 11) {
-        rating = "Excellent! You are a Cyber Security Buddy!";
-        ratingClass = 'rating-excellent';
-    } else if (finalScore >= 8) {
-        rating = "Good! You have a solid understanding of online safety.";
-        ratingClass = 'rating-good';
-    } else if (finalScore >= 5) {
-        rating = "Fair. Keep learning, and review the safety tips!";
-        ratingClass = 'rating-fair';
-    } else {
-        rating = "Needs Improvement. Time to hit the 'Learn Safety' section!";
-        ratingClass = 'rating-poor';
-    }
+    if (finalScore >= 11) {
+        rating = "Excellent! You are a Cyber Security Buddy!";
+        ratingClass = 'rating-excellent';
+    } else if (finalScore >= 8) {
+        rating = "Good! You have a solid understanding of online safety.";
+S         ratingClass = 'rating-good';
+    } else if (finalScore >= 5) {
+        rating = "Fair. Keep learning, and review the safety tips!";
+        ratingClass = 'rating-fair';
+    } else {
+        rating = "Needs Improvement. Time to hit the 'Learn Safety' section!";
+        ratingClass = 'rating-poor';
+    }
 
-    ratingDisplay.textContent = rating;
-    ratingDisplay.className = rating-box ${ratingClass};
+    ratingDisplay.textContent = rating;
+    // --- FIX 4 ---
+    ratingDisplay.className = \`rating-box ${ratingClass}\`;
 }
